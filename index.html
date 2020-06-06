@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no">
+    <title>考试倒计时</title>
+
+    <link rel="stylesheet" href="./css/mdui.css">
+    <link rel="stylesheet" href="./css/main.css">
+    <script src="./js/vue.js"></script>
+</head>
+
+<body class="mdui-appbar-with-toolbar mdui-theme-primary-indigo mdui-theme-accent-pink mdui-loaded">
+    <div id="app">
+        <header class="mdui-appbar mdui-appbar-fixed">
+            <div class="mdui-toolbar mdui-color-theme">
+                <span class="mdui-btn mdui-btn-icon mdui-ripple mdui-ripple-white"
+                    mdui-drawer="{target: '#main-drawer', swipe: true}">
+                    <i class="mdui-icon material-icons">menu</i>
+                </span>
+                <div class="mdui-typo-headline mdui-hidden-xs">科目：{{subject}}</div>
+                <div href="#" class="mdui-typo-title">总时间：{{last}} 分钟</div>
+                <div class="mdui-toolbar-spacer"></div>
+                <a href="https://github.com/Llf0703/" target="_blank"
+                    class="mdui-btn mdui-btn-icon mdui-ripple mdui-ripple-white">
+                    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 36 36"
+                        enable-background="new 0 0 36 36" xml:space="preserve" class="mdui-icon"
+                        style="width: 24px;height:24px;">
+                        <path fill-rule="evenodd" clip-rule="evenodd" fill="#ffffff" d="M18,1.4C9,1.4,1.7,8.7,1.7,17.7c0,7.2,4.7,13.3,11.1,15.5
+                          c0.8,0.1,1.1-0.4,1.1-0.8c0-0.4,0-1.4,0-2.8c-4.5,1-5.5-2.2-5.5-2.2c-0.7-1.9-1.8-2.4-1.8-2.4c-1.5-1,0.1-1,0.1-1
+                          c1.6,0.1,2.5,1.7,2.5,1.7c1.5,2.5,3.8,1.8,4.7,1.4c0.1-1.1,0.6-1.8,1-2.2c-3.6-0.4-7.4-1.8-7.4-8.1c0-1.8,0.6-3.2,1.7-4.4
+                          c-0.2-0.4-0.7-2.1,0.2-4.3c0,0,1.4-0.4,4.5,1.7c1.3-0.4,2.7-0.5,4.1-0.5c1.4,0,2.8,0.2,4.1,0.5c3.1-2.1,4.5-1.7,4.5-1.7
+                          c0.9,2.2,0.3,3.9,0.2,4.3c1,1.1,1.7,2.6,1.7,4.4c0,6.3-3.8,7.6-7.4,8c0.6,0.5,1.1,1.5,1.1,3c0,2.2,0,3.9,0,4.5
+                          c0,0.4,0.3,0.9,1.1,0.8c6.5-2.2,11.1-8.3,11.1-15.5C34.3,8.7,27,1.4,18,1.4z"></path>
+                    </svg>
+                </a>
+            </div>
+        </header>
+
+        <div class="mdui-drawer mdui-drawer-close mdui-color-white" id="main-drawer">
+        </div>
+
+        <div class="mdui-container mdui-shadow-6">
+            <div class="time mdui-typo">
+                {{hour}}:{{min}}:{{second}}
+            </div>
+            <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="setTime()"
+                v-if="!haveBegan">开始</button>
+            <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="pause()"
+                v-if="!isPause && haveBegan">暂停</button>
+            <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="conti()"
+                v-if="isPause && haveBegan">继续</button>
+            <button class="mdui-btn mdui-ripple mdui-color-theme-accent"
+                mdui-dialog="{target: '#exampleDialog'}">设置</button>
+        </div>
+
+        <div class="mdui-dialog" id="exampleDialog">
+            <div class="mdui-dialog-title">设置</div>
+            <div class="mdui-dialog-content">
+                <h3> 考试时间：{{hour}} 小时 {{min}} 分钟 </h3>
+                <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="plus10Min()">续10min</button>
+                <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="plus1H()">续1h</button>
+                <button class="mdui-btn mdui-ripple" v-on:click="sub10Min()">-10min</button>
+                <h3> 考试科目：
+                    <label class="mdui-radio"><input type="radio" value="语文" v-model="subject"><i
+                            class="mdui-radio-icon"></i>语文</label>
+                    <label class="mdui-radio"><input type="radio" value="数学" v-model="subject"><i
+                            class="mdui-radio-icon"></i>数学</label>
+                    <label class="mdui-radio"><input type="radio" value="英语" v-model="subject"><i
+                            class="mdui-radio-icon"></i>英语</label>
+                    <label class="mdui-radio"><input type="radio" value="物理" v-model="subject"><i
+                            class="mdui-radio-icon"></i>物理</label>
+                    <label class="mdui-radio"><input type="radio" value="化学" v-model="subject"><i
+                            class="mdui-radio-icon"></i>化学</label>
+                    <label class="mdui-radio"><input type="radio" value="生物" v-model="subject"><i
+                            class="mdui-radio-icon"></i>生物</label>
+                </h3>
+            </div>
+            <div class="mdui-dialog-actions">
+                <button class="mdui-btn mdui-ripple" mdui-dialog-confirm>确定</button>
+            </div>
+        </div>
+
+        <audio src="./media/ding3.mp3" controls="controls" style="display: none;" id="sound3"></audio>
+
+    </div>
+
+    <footer class="footer mdui-typo">
+        Powered by <a href="https://vuejs.org">Vue</a> & <a href="https://mdui.org">MDUI</a>.
+        <br>&copy; <a href="https://llf0703.com">Llf0703</a> / llf0703.com <a
+            href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license"> <img src="./media/by-sa.svg"
+                alt="Creative Commons License"> </a>
+        <br>More projects on <a href="https://github.com/Llf0703">github.com/Llf0703</a> & <a
+            href="https://pro.llf0703.com">pro.llf0703.com</a>
+    </footer>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    hour: '00',
+                    min: '00',
+                    second: '00',
+                    last: 0,
+                    curTime: 0,
+                    endTime: 0,
+                    isPause: 0,
+                    haveBegan: 0,
+                    pauseLeftTime: 0,
+                    haveBing: 0,
+                    subject: '未设置'
+                }
+            },
+            methods: {
+                updTime(leftTime) {
+                    if (leftTime >= 0) {
+                        let h = Math.floor(leftTime / 1000 / 60 / 60 % 24)
+                        this.hour = h < 10 ? '0' + h : h
+                        let m = Math.floor(leftTime / 1000 / 60 % 60)
+                        this.min = m < 10 ? '0' + m : m
+                        let s = Math.floor(leftTime / 1000 % 60)
+                        this.second = s < 10 ? '0' + s : s
+                    } else {
+                        this.hour = '00'
+                        this.min = '00'
+                        this.second = '00'
+                    }
+                },
+                countTime() {
+                    let date = new Date()
+                    this.curTime = date.getTime()
+                    if (this.isPause) {
+                        this.endTime = this.curTime + this.pauseLeftTime
+                    }
+                    let leftTime = this.endTime - this.curTime
+                    this.updTime(leftTime)
+                    if (Number(this.hour) === 0 && Number(this.min) === 0 && Number(this.second) === 0) {
+                        document.getElementById('sound3').play()
+                        return
+                    } else if (Number(this.min) == 14 && !this.haveBing) {
+                        document.getElementById('sound3').play()
+                        this.haveBing = 1;
+                    }
+                    setTimeout(this.countTime, 100)
+                },
+                setTime() {
+                    this.haveBegan = 1
+                    let date = new Date()
+                    let startTime = date.getTime()
+                    this.endTime = startTime + this.last * 1000 * 60
+                    this.countTime()
+                },
+                pause() {
+                    this.isPause = 1
+                    this.pauseLeftTime = this.endTime - this.curTime
+                },
+                conti() {
+                    this.isPause = 0
+                    this.pauseLeftTime = 0
+                },
+                plus10Min() {
+                    if (this.haveBegan) return
+                    this.last += 10
+                    this.updTime(this.last * 1000 * 60)
+                },
+                plus1H() {
+                    if (this.haveBegan) return
+                    this.last += 60
+                    this.updTime(this.last * 1000 * 60)
+                },
+                sub10Min() {
+                    if (this.haveBegan) return
+                    if (this.last < 10) {
+                        mdui.snackbar({ message: '已经没有时间了，不要再续啦！' });
+                        return;
+                    }
+                    this.last -= 10
+                    this.updTime(this.last * 1000 * 60)
+                }
+            }
+        })
+    </script>
+    <script src="./js/mdui.js"></script>
+</body>
+
+</html>

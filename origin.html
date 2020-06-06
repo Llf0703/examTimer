@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>考试倒计时</title>
+    <script src="https://unpkg.com/vue"></script>
+</head>
+
+<body>
+    <div id="app">
+        <p>{{subject}} 考试 倒计时：{{hour}}：{{min}}：{{second}}</p>
+        <button v-on:click="plus10Min()">续10min</button>
+        <button v-on:click="plus1H()">续1h</button>
+        <button v-on:click="sub10Min()">-10min</button>
+        <p>{{last}}</p>
+        <select v-model="subject">
+            <option disabled value="">请选择</option>
+            <option>语文</option>
+            <option>数学</option>
+            <option>英语</option>
+        </select>
+        <input type="radio" id="ch" value="语文" v-model="subject"><label for="ch">语文</label>
+        <input type="radio" id="ma" value="数学" v-model="subject"><label for="ma">数学</label>
+        <input type="radio" id="en" value="英语" v-model="subject"><label for="en">英语</label>
+        <button v-on:click="setTime()" v-if="!haveBegan">开始</button>
+        <button v-on:click="pause()" v-if="!isPause && haveBegan">暂停</button>
+        <button v-on:click="conti()" v-if="isPause && haveBegan">继续</button>
+        <audio src="./ding3.mp3" controls="controls" style="display: none;" id="sound3"></audio>
+    </div>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    hour: '00',
+                    min: '00',
+                    second: '00',
+                    last: 0,
+                    curTime: 0,
+                    endTime: 0,
+                    isPause: 0,
+                    haveBegan: 0,
+                    pauseLeftTime: 0,
+                    haveBing: 0,
+                    subject: ''
+                }
+            },
+            methods: {
+                updTime(leftTime) {
+                    if (leftTime >= 0) {
+                        let h = Math.floor(leftTime / 1000 / 60 / 60 % 24)
+                        this.hour = h < 10 ? '0' + h : h
+                        let m = Math.floor(leftTime / 1000 / 60 % 60)
+                        this.min = m < 10 ? '0' + m : m
+                        let s = Math.floor(leftTime / 1000 % 60)
+                        this.second = s < 10 ? '0' + s : s
+                    } else {
+                        this.hour = '00'
+                        this.min = '00'
+                        this.second = '00'
+                    }
+                },
+                countTime() {
+                    let date = new Date()
+                    this.curTime = date.getTime()
+                    if (this.isPause) {
+                        this.endTime = this.curTime + this.pauseLeftTime
+                    }
+                    let leftTime = this.endTime - this.curTime
+                    this.updTime(leftTime)
+                    if (Number(this.hour) === 0 && Number(this.min) === 0 && Number(this.second) === 0) {
+                        document.getElementById('sound3').play()
+                        return
+                    } else if (Number(this.min) == 14 && !this.haveBing) {
+                        document.getElementById('sound3').play()
+                        this.haveBing = 1;
+                    }
+                    setTimeout(this.countTime, 100)
+                },
+                setTime() {
+                    this.haveBegan = 1
+                    let date = new Date()
+                    let startTime = date.getTime()
+                    this.endTime = startTime + this.last * 1000 * 60
+                    this.countTime()
+                },
+                pause() {
+                    this.isPause = 1
+                    this.pauseLeftTime = this.endTime - this.curTime
+                },
+                conti() {
+                    this.isPause = 0
+                    this.pauseLeftTime = 0
+                },
+                plus10Min() {
+                    if (this.haveBegan) return
+                    this.last += 10
+                    this.updTime(this.last * 1000 * 60)
+                },
+                plus1H() {
+                    if (this.haveBegan) return
+                    this.last += 60
+                    this.updTime(this.last * 1000 * 60)
+                },
+                sub10Min() {
+                    if (this.haveBegan) return
+                    if (this.last < 10) {
+                        //mdui.snackbar({ message: '续完了' });
+                        return;
+                    }
+                    this.last -= 10
+                    this.updTime(this.last * 1000 * 60)
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
