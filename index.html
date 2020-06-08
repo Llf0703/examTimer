@@ -140,7 +140,7 @@
                     if (Number(this.hour) === 0 && Number(this.min) === 0 && Number(this.second) === 0) {
                         document.getElementById('sound3').play()
                         return
-                    } else if (Number(this.min) == 14 && !this.haveBing) {
+                    } else if (Number(this.min) == 14 && !Number(this.hour) && !this.haveBing) {
                         document.getElementById('sound3').play()
                         this.haveBing = 1;
                     }
