@@ -24,3 +24,13 @@
     text-align: center;
     font-size: 1.2rem;
 }
+
+.mdui-progress {
+    margin: -20px -8px auto -8px;
+    width: auto;
+    background-color:  #FCE4EC !important
+}
+
+.mdui-progress-determinate {
+    background-color:#FF4081 !important
+}

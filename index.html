@@ -43,39 +43,57 @@
         </div>
 
         <div class="mdui-container mdui-shadow-6">
+            <div class="mdui-progress">
+                <div class="mdui-progress-determinate" v-bind:style="width"></div>
+              </div>
             <div class="time mdui-typo">
-                {{hour}}:{{min}}:{{second}}
+                <div v-if="!isEnd">{{hour}}:{{min}}:{{second}}</div>
+                <div v-if="isEnd">考试结束</div>
             </div>
-            <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="setTime()"
-                v-if="!haveBegan">开始</button>
-            <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="pause()"
-                v-if="!isPause && haveBegan">暂停</button>
-            <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="conti()"
-                v-if="isPause && haveBegan">继续</button>
-            <button class="mdui-btn mdui-ripple mdui-color-theme-accent"
-                mdui-dialog="{target: '#exampleDialog'}">设置</button>
+            <button class="mdui-btn mdui-btn-icon mdui-ripple mdui-color-theme-accent" v-on:click="setTime()"
+                v-if="!haveBegan"><i class="mdui-icon material-icons">&#xe037;</i></button>
+            <button class="mdui-btn mdui-btn-icon mdui-ripple mdui-color-theme-accent" v-on:click="pause()"
+                v-if="!isPause && haveBegan &&!isEnd"><i class="mdui-icon material-icons">&#xe034;</i></button>
+            <button class="mdui-btn mdui-btn-icon mdui-ripple mdui-color-theme-accent" v-on:click="conti()"
+                v-if="isPause && haveBegan && !isEnd"><i class="mdui-icon material-icons">&#xe037;</i></button>
+            <button class="mdui-btn mdui-btn-icon mdui-ripple mdui-color-indigo-accent" mdui-dialog="{target: '#exampleDialog'}"
+                v-if="!haveBegan"><i class="mdui-icon material-icons">&#xe8b8;</i></button>
+            <button class="mdui-btn mdui-btn-icon mdui-ripple mdui-color-indigo-accent" v-on:click="location.reload()"
+                v-if="haveBegan"><i class="mdui-icon material-icons">&#xe863;</i></button>
         </div>
 
         <div class="mdui-dialog" id="exampleDialog">
             <div class="mdui-dialog-title">设置</div>
             <div class="mdui-dialog-content">
-                <h3> 考试时间：{{hour}} 小时 {{min}} 分钟 </h3>
-                <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="plus10Min()">续10min</button>
-                <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="plus1H()">续1h</button>
+                <h3> <i class="mdui-icon material-icons">&#xe192;</i> 时间：{{hour}} 小时 {{min}} 分钟 </h3>
+                <button class="mdui-btn mdui-ripple mdui-color-indigo-accent" v-on:click="initTime()">预设</button>
+                <button class="mdui-btn mdui-ripple mdui-color-indigo-accent" v-on:click="clearTime()">归零</button>
+                <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="plus1H()">+1h</button>
+                <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="plus10Min()">+10min</button>
+                <button class="mdui-btn mdui-ripple mdui-color-theme-accent" v-on:click="plus1Min()">+1min</button>
                 <button class="mdui-btn mdui-ripple" v-on:click="sub10Min()">-10min</button>
-                <h3> 考试科目：
+                <h3> <i class="mdui-icon material-icons">&#xe86e;</i> 科目：
                     <label class="mdui-radio"><input type="radio" value="语文" v-model="subject"><i
                             class="mdui-radio-icon"></i>语文</label>
                     <label class="mdui-radio"><input type="radio" value="数学" v-model="subject"><i
                             class="mdui-radio-icon"></i>数学</label>
                     <label class="mdui-radio"><input type="radio" value="英语" v-model="subject"><i
                             class="mdui-radio-icon"></i>英语</label>
+                    <label class="mdui-radio"><input type="radio" value="理综" v-model="subject"><i
+                            class="mdui-radio-icon"></i>理综</label>
                     <label class="mdui-radio"><input type="radio" value="物理" v-model="subject"><i
                             class="mdui-radio-icon"></i>物理</label>
                     <label class="mdui-radio"><input type="radio" value="化学" v-model="subject"><i
                             class="mdui-radio-icon"></i>化学</label>
                     <label class="mdui-radio"><input type="radio" value="生物" v-model="subject"><i
                             class="mdui-radio-icon"></i>生物</label>
+                </h3>
+                <h3>
+                <i class="mdui-icon material-icons">&#xe3a1;</i> 提醒：
+                <label class="mdui-switch">
+                    <input type="checkbox" v-model="music" checked/>
+                    <i class="mdui-switch-icon"></i>
+                </label>
                 </h3>
             </div>
             <div class="mdui-dialog-actions">
@@ -105,28 +123,32 @@
                     min: '00',
                     second: '00',
                     last: 0,
+                    totSecond: 0,
                     curTime: 0,
                     endTime: 0,
                     isPause: 0,
                     haveBegan: 0,
                     pauseLeftTime: 0,
-                    haveBing: 0,
-                    subject: '未设置'
+                    subject: '未设置',
+                    music: true,
+                    isEnd: 0,
+                    width: {
+                        width: '0%'
+                    }
                 }
             },
             methods: {
                 updTime(leftTime) {
-                    if (leftTime >= 0) {
-                        let h = Math.floor(leftTime / 1000 / 60 / 60 % 24)
-                        this.hour = h < 10 ? '0' + h : h
-                        let m = Math.floor(leftTime / 1000 / 60 % 60)
-                        this.min = m < 10 ? '0' + m : m
-                        let s = Math.floor(leftTime / 1000 % 60)
-                        this.second = s < 10 ? '0' + s : s
-                    } else {
-                        this.hour = '00'
-                        this.min = '00'
-                        this.second = '00'
+                    let h = Math.floor(leftTime / 1000 / 60 / 60 % 24)
+                    this.hour = h < 10 ? '0' + h : h
+                    let m = Math.floor(leftTime / 1000 / 60 % 60)
+                    this.min = m < 10 ? '0' + m : m
+                    let s = Math.floor(leftTime / 1000 % 60)
+                    this.second = s < 10 ? '0' + s : s
+                    let curSecond = leftTime / 1000
+                    let widthPercent = (1 - curSecond/this.totSecond)*100
+                    this.width = {
+                         width: widthPercent+'%'
                     }
                 },
                 countTime() {
@@ -136,17 +158,23 @@
                         this.endTime = this.curTime + this.pauseLeftTime
                     }
                     let leftTime = this.endTime - this.curTime
+                    if (leftTime < 0) leftTime = 0
                     this.updTime(leftTime)
-                    if (Number(this.hour) === 0 && Number(this.min) === 0 && Number(this.second) === 0) {
+                    if (!leftTime) {
                         document.getElementById('sound3').play()
+                        this.isEnd=1
                         return
-                    } else if (Number(this.min) == 14 && !Number(this.hour) && !this.haveBing) {
+                    } else if (!Number(this.second) && Number(this.min) == 15 && !Number(this.hour) && this.music) {
                         document.getElementById('sound3').play()
-                        this.haveBing = 1;
                     }
                     setTimeout(this.countTime, 100)
                 },
                 setTime() {
+                    if (!this.last) {
+                        mdui.snackbar({ message: '未设置时间！'})
+                        return
+                    }
+                    this.totSecond = this.last * 60
                     this.haveBegan = 1
                     let date = new Date()
                     let startTime = date.getTime()
@@ -166,6 +194,11 @@
                     this.last += 10
                     this.updTime(this.last * 1000 * 60)
                 },
+                plus1Min() {
+                    if (this.haveBegan) return
+                    this.last += 1
+                    this.updTime(this.last * 1000 * 60)
+                },
                 plus1H() {
                     if (this.haveBegan) return
                     this.last += 60
@@ -174,11 +207,22 @@
                 sub10Min() {
                     if (this.haveBegan) return
                     if (this.last < 10) {
-                        mdui.snackbar({ message: '已经没有时间了，不要再续啦！' });
-                        return;
+                        mdui.snackbar({ message: '已经没有时间了，不要再续啦！' })
+                        return
                     }
                     this.last -= 10
                     this.updTime(this.last * 1000 * 60)
+                },
+                initTime() {
+                    if (this.haveBegan) return
+                    if (this.subject == '未设置') mdui.snackbar({ message: '未设置科目！' })
+                    if (this.subject == "语文" || this.subject == "理综") this.last = 150
+                    else if (this.subject == "数学" || this.subject == "英语") this.last = 120
+                    this.updTime(this.last * 1000 * 60)
+                },
+                clearTime() {
+                    if (this.haveBegan) return
+                    this.updTime(this.last = 0)
                 }
             }
         })
